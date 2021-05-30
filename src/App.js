@@ -1,9 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { CAKE_ADDRESS, BEP20_ABI }from "./constants"
+import { CAKE_ADDRESS, BEP20_ABI, MaxUint256 }from "./constants"
+import { ReadContractData } from './ContractUtils'
 import Web3 from 'web3';
 
-const web3 = new Web3('https://bsc-dataseed1.binance.org/');
+// const web3 = new Web3('https://bsc-dataseed1.binance.org/');
+const web3 = new Web3(window.ethereum);
+// const web3 = new Web3(web3.currentProvider);
 
 function App() {
 
@@ -45,6 +48,12 @@ function App() {
 
   const getTokenBalance = async () => {
 
+    // const symbol = await ReadContractData(web3, tokenAddress, BEP20_ABI, 'symbol', [])
+    // console.log(symbol)
+
+    // const balance = await ReadContractData(web3, tokenAddress, BEP20_ABI, 'balanceOf', [address])
+    // console.log(balance)
+
     const contract = new web3.eth.Contract(
       BEP20_ABI,
       tokenAddress
@@ -55,6 +64,20 @@ function App() {
     setTokenName(symbol)
     setAmount(balance)
 
+  }
+
+  const approveToken = async () => {
+    const contract = new web3.eth.Contract(
+      BEP20_ABI,
+      tokenAddress
+    )
+    try {
+      // const result = await contract.methods['approve'](address, MaxUint256).send({ from: address })
+      const result = await contract.methods.approve(address, MaxUint256).send({ from: address })
+      console.log(result)
+    } catch(err) {
+      console.log(err)
+    }
   }
 
   useEffect(() => {
@@ -81,7 +104,8 @@ function App() {
         />
       </p>
       <p>Account has {amount} {tokenName} in user balance</p>
-      <button onClick={getTokenBalance}> Get Token Balance </button>
+      <button onClick={getTokenBalance}> Get Token Balance </button> <br />
+      <button onClick={approveToken}> Approve Token </button>
     </div>
   );
 }
